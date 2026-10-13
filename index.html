@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111827"><link rel="manifest" href="./manifest.json"><title>FuelUp AI</title>
+<style>
+:root{font-family:system-ui,Segoe UI,sans-serif;color:#e5e7eb;background:#0b1220}*{box-sizing:border-box}
+body{margin:0}.wrap{max-width:1000px;margin:auto;padding:22px}header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+h1{font-size:30px;margin:0;color:#a7f3d0}h2{margin:0 0 14px;font-size:20px}.sub{color:#94a3b8}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0}button,.btn{background:#10b981;color:#071b15;border:0;border-radius:12px;padding:11px 15px;font-weight:700;cursor:pointer}
+nav button{background:#1e293b;color:#e2e8f0}nav button.active{background:#10b981;color:#071b15}
+.panel{background:#111c2f;border:1px solid #29364c;border-radius:18px;padding:20px;margin:14px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}.stat{background:#19283d;padding:16px;border-radius:14px}
+.big{font-size:27px;font-weight:800;color:#a7f3d0}label{display:block;margin:10px 0 5px;color:#cbd5e1}
+input,textarea,select{width:100%;padding:12px;background:#0b1220;color:#f8fafc;border:1px solid #475569;border-radius:10px}
+textarea{min-height:90px}form .grid{margin-bottom:12px}.hidden{display:none}table{width:100%;border-collapse:collapse}td,th{padding:10px;text-align:left;border-bottom:1px solid #334155}
+.muted{color:#94a3b8;font-size:14px}.danger{background:#ef4444;color:white}.pill{display:inline-block;padding:5px 9px;background:#193f38;border-radius:9px}
+#bars{display:flex;align-items:end;gap:10px;height:170px;border-bottom:1px solid #475569;margin:20px 0}
+.bar{flex:1;background:#10b981;border-radius:7px 7px 0 0;min-height:3px;position:relative}
+.bar span{position:absolute;bottom:-23px;left:0;width:100%;text-align:center;font-size:11px;color:#94a3b8}
+img.preview{max-width:100%;max-height:230px;border-radius:12px;margin-top:12px}
+@media(max-width:500px){.wrap{padding:14px}table{font-size:12px}td,th{padding:6px}}
+</style></head><body><div class="wrap">
+<header><div><h1>⚡ FuelUp AI</h1><div class="sub">Jídelní deník a inspirace pro lepší stravování</div></div><span class="pill">Beta</span></header>
+<nav><button data-tab="diary" class="active">Deník</button><button data-tab="history">Historie</button><button data-tab="ai">AI nástroje</button><button data-tab="settings">Nastavení</button></nav>
+<section id="diary">
+<div class="panel"><h2>Dnešní přehled</h2><div class="grid">
+<div class="stat"><div class="muted">Kalorie</div><div class="big" id="totalKcal">0 kcal</div></div>
+<div class="stat"><div class="muted">Bílkoviny</div><div class="big" id="totalProtein">0 g</div></div>
+<div class="stat"><div class="muted">Sacharidy</div><div class="big" id="totalCarbs">0 g</div></div>
+<div class="stat"><div class="muted">Tuky</div><div class="big" id="totalFat">0 g</div></div></div></div>
+<div class="panel"><h2>Přidat jídlo</h2><form id="foodForm"><div class="grid">
+<div><label>Název jídla</label><input name="name" required placeholder="Např. ovesná kaše"></div>
+<div><label>Datum</label><input type="date" name="date" id="foodDate" required></div>
+<div><label>Kalorie (kcal)</label><input type="number" name="kcal" min="0" step="any" required></div>
+<div><label>Bílkoviny (g)</label><input type="number" name="protein" min="0" step="any" required></div>
+<div><label>Sacharidy (g)</label><input type="number" name="carbs" min="0" step="any" required></div>
+<div><label>Tuky (g)</label><input type="number" name="fat" min="0" step="any" required></div></div>
+<button type="submit">+ Uložit jídlo</button></form></div>
+<div class="panel"><h2>Záznamy pro vybraný den</h2><div id="entries"></div></div>
+</section>
+<section id="history" class="hidden"><div class="panel"><h2>Kalorie za posledních 7 dní</h2><div id="bars"></div><p class="muted">Graf z ručně zadaných záznamů. Sloupce ukazují celkové kcal za den.</p></div><div class="panel"><h2>Všechny záznamy</h2><div id="allEntries"></div></div></section>
+<section id="ai" class="hidden"><div class="panel"><h2>📸 Odhad jídla z fotky</h2><p class="muted">Orientační odhad, nikdy přesné měření. Vyžaduje spuštěný lokální AI server.</p><input id="photo" type="file" accept="image/*"><img id="photoPreview" class="preview hidden"><p><button id="analyze">Analyzovat fotku</button></p><div id="photoResult"></div></div>
+<div class="panel"><h2>🍳 Recepty z domácích surovin</h2><label>Co máš doma?</label><textarea id="ingredients" placeholder="Např. vejce, rýže, rajčata, sýr"></textarea><button id="recipes">Navrhnout recepty</button><div id="recipeResult"></div></div>
+<div class="panel"><h2>💬 AI výživový pomocník</h2><p class="muted">Obecné tipy, ne lékařské poradenství. Pro dospívající nejsou vhodné přísné kalorické limity.</p><textarea id="question" placeholder="Např. Co jíst po tréninku?"></textarea><button id="coach">Zeptat se</button><div id="coachResult"></div></div></section>
+<section id="settings" class="hidden"><div class="panel"><h2>Záloha dat</h2><p class="muted">Záznamy se ukládají jen do tohoto prohlížeče. Mezi PC a telefonem se samy nesynchronizují.</p><button id="export">Stáhnout zálohu JSON</button><label>Obnovit ze zálohy</label><input id="import" type="file" accept=".json,application/json"></div>
+<div class="panel"><h2>Informace</h2><p>FuelUp AI je beta verze. Pro AI je nutný lokální server s vlastním API klíčem; veřejné nasazení serveru bez přihlášení a omezení požadavků není bezpečné.</p></div></section>
+<footer class="muted" style="padding:20px 0">FuelUp AI • Soukromá data ve tvém prohlížeči</footer></div>
+<script>
+const $=s=>document.querySelector(s);const KEY='fuelup-v2';let foods=[];
+try{foods=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(foods))foods=[]}catch{foods=[]}
+const today=()=>new Date().toLocaleDateString('en-CA');$('#foodDate').value=today();
+function save(){localStorage.setItem(KEY,JSON.stringify(foods));render()}
+function safe(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function row(f){return `<tr><td>${safe(f.date)}</td><td>${safe(f.name)}</td><td>${f.kcal}</td><td>${f.protein} g</td><td><button class="danger" data-del="${safe(f.id)}">Smazat</button></td></tr>`}
+function table(a){return a.length?`<div style="overflow:auto"><table><thead><tr><th>Datum</th><th>Jídlo</th><th>kcal</th><th>Bílkoviny</th><th></th></tr></thead><tbody>${a.map(row).join('')}</tbody></table></div>`:'<p class="muted">Zatím žádné záznamy.</p>'}
+function render(){let selected=$('#foodDate').value;let daily=foods.filter(f=>f.date===selected);
+for(let [id,key,unit] of [['totalKcal','kcal',' kcal'],['totalProtein','protein',' g'],['totalCarbs','carbs',' g'],['totalFat','fat',' g']])$('#'+id).textContent=Math.round(daily.reduce((a,f)=>a+Number(f[key]||0),0)*10)/10+unit;
+$('#entries').innerHTML=table(daily);$('#allEntries').innerHTML=table([...foods].sort((a,b)=>b.date.localeCompare(a.date)));
+let ds=Array.from({length:7},(_,i)=>{let d=new Date();d.setDate(d.getDate()-(6-i));return d.toLocaleDateString('en-CA')});
+let totals=ds.map(d=>foods.filter(f=>f.date===d).reduce((a,f)=>a+Number(f.kcal||0),0));let max=Math.max(...totals,1);
+$('#bars').innerHTML=ds.map((d,i)=>`<div class="bar" title="${d}: ${Math.round(totals[i])} kcal" style="height:${Math.max(2,totals[i]/max*100)}%"><span>${d.slice(5)}</span></div>`).join('')}
+$('#foodForm').addEventListener('submit',e=>{e.preventDefault();let v=Object.fromEntries(new FormData(e.target));foods.push({id:crypto.randomUUID(),name:v.name,date:v.date,kcal:+v.kcal,protein:+v.protein,carbs:+v.carbs,fat:+v.fat});save();let date=v.date;e.target.reset();$('#foodDate').value=date});
+$('#foodDate').addEventListener('change',render);
+document.addEventListener('click',e=>{if(e.target.dataset.del){foods=foods.filter(f=>f.id!==e.target.dataset.del);save()}});
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('section').forEach(s=>s.classList.toggle('hidden',s.id!==b.dataset.tab));render()});
+$('#export').onclick=()=>{let blob=new Blob([JSON.stringify(foods,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fuelup-zaloha.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+$('#import').onchange=async e=>{try{let a=JSON.parse(await e.target.files[0].text());if(!Array.isArray(a)||!a.every(f=>typeof f.name==='string'&&typeof f.date==='string'&&Number.isFinite(+f.kcal)))throw Error('Neplatný formát');if(confirm('Nahradit současné záznamy zálohou?')){foods=a;save()}}catch(err){alert('Zálohu se nepodařilo načíst: '+err.message)}};
+let photoData=null;$('#photo').onchange=async e=>{let f=e.target.files[0];if(!f)return;photoData=await new Promise((resolve,reject)=>{let r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(f)});$('#photoPreview').src=photoData;$('#photoPreview').classList.remove('hidden')};
+async function ask(path,data,target){target.textContent='Načítám…';try{let r=await fetch('./api/'+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});let j=await r.json();if(!r.ok)throw Error(j.error||'Chyba serveru');target.textContent=j.answer||'Bez odpovědi'}catch(e){target.textContent='AI není dostupná: '+e.message+'. Spusť lokální server podle README.txt.'}}
+$('#analyze').onclick=()=>photoData?ask('analyze',{image:photoData},$('#photoResult')):alert('Nejdřív vyber fotku.');
+$('#recipes').onclick=()=>ask('recipes',{ingredients:$('#ingredients').value},$('#recipeResult'));
+$('#coach').onclick=()=>ask('coach',{question:$('#question').value},$('#coachResult'));
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+render();
+</script></body></html>
